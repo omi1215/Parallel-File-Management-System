@@ -1,1 +1,8 @@
-﻿  MPI_PROJECT.vcxproj -> D:\Patient Record Management System With MPI\MPI_CRUD-Patient-Record\x64\Debug\MPI_PROJECT.exe
+﻿  Source.cpp
+D:\Patient Record Management System With MPI\MPI_CRUD-Patient-Record\MPI_PROJECT\Source.cpp(317,36): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+D:\Patient Record Management System With MPI\MPI_CRUD-Patient-Record\MPI_PROJECT\Source.cpp(388,30): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+D:\Patient Record Management System With MPI\MPI_CRUD-Patient-Record\MPI_PROJECT\Source.cpp(400,78): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+D:\Patient Record Management System With MPI\MPI_CRUD-Patient-Record\MPI_PROJECT\Source.cpp(402,78): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+D:\Patient Record Management System With MPI\MPI_CRUD-Patient-Record\MPI_PROJECT\Source.cpp(404,78): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+D:\Patient Record Management System With MPI\MPI_CRUD-Patient-Record\MPI_PROJECT\Source.cpp(571): warning C4715: 'calldelNode': not all control paths return a value
+  MPI_PROJECT.vcxproj -> D:\Patient Record Management System With MPI\MPI_CRUD-Patient-Record\x64\Debug\MPI_PROJECT.exe

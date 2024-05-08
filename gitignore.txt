@@ -1,0 +1,1 @@
+.vs/MPI_PROJECT/v17/Browse.VC.opendb

@@ -436,6 +436,7 @@ int main(int argc, char** argv) {
         MPI_Allreduce(&local_status, &global_status, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);
         if (global_status == 0 && world_rank == 0) {
             cout << "No data found" << endl;
+            logmod(new_patient.P_id, "retrieve record", 0);
         }
 
         break;
@@ -620,6 +621,7 @@ bool printdataspecific(Node* root, string key, int world_rank) {
         cout << "The date is" << result->key.date << endl;
         cout << "The sex is " << result->key.sex << endl;
         cout << "The illness is " << result->key.illness << endl;
+        logmod(key, "update record", 1);
         return true;
     }
     else if (world_rank == 1 && status1 == true) {
@@ -629,6 +631,7 @@ bool printdataspecific(Node* root, string key, int world_rank) {
         cout << "The date is" << result->key.date << endl;
         cout << "The sex is " << result->key.sex << endl;
         cout << "The illness is " << result->key.illness << endl;
+        logmod(key, "update record", 1);
         return true;
     }
     else if (world_rank == 2 && status1 == true) {
@@ -638,6 +641,7 @@ bool printdataspecific(Node* root, string key, int world_rank) {
         cout << "The date is" << result->key.date << endl;
         cout << "The sex is " << result->key.sex << endl;
         cout << "The illness is " << result->key.illness << endl;
+        logmod(key, "update record", 1);
         return true;
     }
     else {
