@@ -1,9 +1,1 @@
-﻿  Source.cpp
-D:\Semester6\PDC\MPI_PROJECT\MPI_PROJECT\Source.cpp(295,19): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-D:\Semester6\PDC\MPI_PROJECT\MPI_PROJECT\Source.cpp(506,19): warning C4129: 'S': unrecognized character escape sequence
-D:\Semester6\PDC\MPI_PROJECT\MPI_PROJECT\Source.cpp(506,19): warning C4129: 'P': unrecognized character escape sequence
-D:\Semester6\PDC\MPI_PROJECT\MPI_PROJECT\Source.cpp(506,19): warning C4129: 'M': unrecognized character escape sequence
-D:\Semester6\PDC\MPI_PROJECT\MPI_PROJECT\Source.cpp(506,19): warning C4129: 'l': unrecognized character escape sequence
-D:\Semester6\PDC\MPI_PROJECT\MPI_PROJECT\Source.cpp(406): warning C4715: 'calldelNode': not all control paths return a value
-D:\Semester6\PDC\MPI_PROJECT\MPI_PROJECT\Source.cpp(442): warning C4715: 'callsearch': not all control paths return a value
-  MPI_PROJECT.vcxproj -> D:\Semester6\PDC\MPI_PROJECT\x64\Debug\MPI_PROJECT.exe
+﻿  MPI_PROJECT.vcxproj -> D:\Patient Record Management System With MPI\MPI_CRUD-Patient-Record\x64\Debug\MPI_PROJECT.exe
