@@ -48,14 +48,6 @@ The main objective is to leverage **MPI (Message Passing Interface)** to build a
 7. **Load Balancing Module**: Dynamically adjusts workload distribution to optimize performance.
 8. **Parallel Compression Module**: Compresses and decompresses data in parallel to reduce storage and network usage.
 
-## Learning Outcomes
-By completing this project, you will:
-- Gain proficiency in **MPI programming** for parallel and distributed systems.
-- Understand how to design and implement a **distributed file management system**.
-- Develop problem-solving skills related to debugging and optimizing distributed systems.
-- Learn to manage **software engineering principles** like modularity and maintainability.
-- Build experience in **project management** and collaboration.
-
 ## Technologies Used
 - **Languages**: C++/C
 - **Parallel Computing Framework**: MPI (Message Passing Interface)
