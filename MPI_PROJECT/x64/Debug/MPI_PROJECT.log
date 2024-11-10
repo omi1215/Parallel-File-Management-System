@@ -1,8 +1,9 @@
 ﻿  Source.cpp
-D:\Patient Record Management System With MPI\MPI_CRUD-Patient-Record\MPI_PROJECT\Source.cpp(317,36): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
-D:\Patient Record Management System With MPI\MPI_CRUD-Patient-Record\MPI_PROJECT\Source.cpp(388,30): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
-D:\Patient Record Management System With MPI\MPI_CRUD-Patient-Record\MPI_PROJECT\Source.cpp(400,78): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-D:\Patient Record Management System With MPI\MPI_CRUD-Patient-Record\MPI_PROJECT\Source.cpp(402,78): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-D:\Patient Record Management System With MPI\MPI_CRUD-Patient-Record\MPI_PROJECT\Source.cpp(404,78): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-D:\Patient Record Management System With MPI\MPI_CRUD-Patient-Record\MPI_PROJECT\Source.cpp(571): warning C4715: 'calldelNode': not all control paths return a value
-  MPI_PROJECT.vcxproj -> D:\Patient Record Management System With MPI\MPI_CRUD-Patient-Record\x64\Debug\MPI_PROJECT.exe
+C:\Users\ompar\OneDrive\Desktop\MPI_PROJECT\MPI_PROJECT\MPI_PROJECT\Source.cpp(346,36): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\ompar\OneDrive\Desktop\MPI_PROJECT\MPI_PROJECT\MPI_PROJECT\Source.cpp(426,34): warning C4267: '=': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\ompar\OneDrive\Desktop\MPI_PROJECT\MPI_PROJECT\MPI_PROJECT\Source.cpp(438,82): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\ompar\OneDrive\Desktop\MPI_PROJECT\MPI_PROJECT\MPI_PROJECT\Source.cpp(440,82): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\ompar\OneDrive\Desktop\MPI_PROJECT\MPI_PROJECT\MPI_PROJECT\Source.cpp(442,82): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\ompar\OneDrive\Desktop\MPI_PROJECT\MPI_PROJECT\MPI_PROJECT\Source.cpp(616): warning C4715: 'calldelNode': not all control paths return a value
+C:\Users\ompar\OneDrive\Desktop\MPI_PROJECT\MPI_PROJECT\MPI_PROJECT\Source.cpp(708): warning C4715: 'printdataspecific': not all control paths return a value
+  MPI_PROJECT.vcxproj -> C:\Users\ompar\OneDrive\Desktop\MPI_PROJECT\MPI_PROJECT\x64\Debug\MPI_PROJECT.exe

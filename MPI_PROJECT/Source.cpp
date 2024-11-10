@@ -241,15 +241,14 @@ bool Update(Node* root, string key, int world_rank) {
 }
 
 bool recover(const vector<PatientData>& all_data) {
-    ofstream write("C:/Users/ompar/Downloads/installation of MPI on Windows_x64/installation of MPI on Windows_x64/MPI_PROJECT/MPI_PROJECT/recover.txt");
+    ofstream write("recover.txt");
     if (!write.is_open()) {
         cout << "Error opening recover file." << endl;
         return false;
     }
-
-    for (const auto& patient : all_data) {
-        write << patient.P_id << ", " << patient.age << ", " << patient.sex << ", "
-            << patient.b_group << ", " << patient.date << ", " << patient.illness << endl;
+    for (vector<PatientData>::const_iterator patient = all_data.begin(); patient != all_data.end(); ++patient) {
+        write << patient->P_id << ", " << patient->age << ", " << patient->sex << ", "
+            << patient->b_group << ", " << patient->date << ", " << patient->illness << endl;
     }
 
     write.close();
@@ -257,8 +256,7 @@ bool recover(const vector<PatientData>& all_data) {
 }
 
 void displaylog();
-void exitfile(Node* root, int world_rank);
-void logmod(string key, string operation);
+void exitfile(Node* root, int world_rank,int worldsize);
 void logmod(string key, string operation, bool status);
 bool printdataspecific(Node* root, string key, int world_rank);
 bool deleteNode(Node*& root, string key);
@@ -270,6 +268,7 @@ int main(int argc, char** argv) {
     int status1;
     string update_id;
     int len_id;
+    int rec = 0;
     PatientData new_patient;
     MPI_Init(&argc, &argv);
     int world_rank;
@@ -285,9 +284,9 @@ int main(int argc, char** argv) {
 
     // Root process reads the file
     vector<PatientData> all_data;
-    for (int i = 0; i < world_size; i++) {
+    for (int i = 0; i < 3; i++) {
         if (world_rank == 0) {
-            ifstream infile("C:/Users/ompar/Downloads/installation of MPI on Windows_x64/installation of MPI on Windows_x64/MPI_PROJECT/MPI_PROJECT/f" + to_string(i + 1) + ".txt");
+            ifstream infile("f" + to_string(i + 1) + ".txt");
             if (!infile.is_open()) {
                 cerr << "Unable to open file." << endl;
                 MPI_Finalize();
@@ -313,25 +312,57 @@ int main(int argc, char** argv) {
         }
     }
 
+    if (world_rank == 0) {
+        cout << "Press 0 to recover files else 1" << endl;
+        cin >> rec;
+        if (rec == 0) {
+            all_data.clear();
+            ifstream infile("recover.txt");
+            if (!infile.is_open()) {
+                cerr << "Unable to open file." << endl;
+                MPI_Finalize();
+                return 1;
+            }
+
+            string line;
+            while (getline(infile, line)) {
+                stringstream ss(line);
+                PatientData patient;
+                getline(ss, patient.P_id, ',');
+                ss >> patient.age;
+                ss.ignore(1); // Ignore comma
+                ss >> patient.sex;
+                ss.ignore(1); // Ignore comma
+                getline(ss, patient.b_group, ',');
+                getline(ss, patient.date, ',');
+                getline(ss, patient.illness);
+                all_data.push_back(patient);
+            }
+            infile.close();
+        }
+    }
+    
     // Broadcast the size of the patient data to all processes
     int data_size = all_data.size();
+  
     MPI_Bcast(&data_size, 1, MPI_INT, 0, MPI_COMM_WORLD);
-
+   
     // Each process calculates its share of the data
     int local_size = data_size / world_size;
     if (world_rank == 0) {
         local_size += data_size % world_size; // Root process takes the remainder
     }
-
+   cout << "local size is" << local_size << endl;
     // Allocate space for local data
     vector<PatientData> local_data(local_size);
 
     MPI_Scatter(all_data.data(), local_size * sizeof(PatientData), MPI_BYTE, local_data.data(), local_size * sizeof(PatientData), MPI_BYTE, 0, MPI_COMM_WORLD);
     Node* root = NULL;
+    
     vector<PatientData>::iterator it = local_data.begin();
     for (it; it < local_data.end(); it++) {
         root = insertNode(root, *it);
-        if (world_rank == 2) {
+        if (world_rank == world_size-1) {
             vector<PatientData>::iterator et = local_data.end();
             et -= 2;
             if (it == et) {
@@ -339,145 +370,153 @@ int main(int argc, char** argv) {
             }
         }
     }
+   
     MPI_Barrier(MPI_COMM_WORLD);
 
     int choice = 0;
-
-    if (world_rank == 0) {
-        cout << "=== Menu ===" << endl;
-        cout << "1. Add Patient Data" << endl;
-        cout << "2. Search for Patient Data" << endl;
-        cout << "3. Update Patient Data" << endl;
-        cout << "4. Delete Patient Data" << endl;
-        cout << "5. Display Log" << endl;
-        cout << "6. Exit" << endl;
-        cout << "Enter your choice: ";
-        cin >> choice;
-
-        if (choice == 1) {
-
-            cout << "Enter Patient ID: ";
-            cin >> new_patient.P_id;
-            cout << "Enter Age: ";
-            cin >> new_patient.age;
-            cout << "Enter Sex: ";
-            cin >> new_patient.sex;
-            cout << "Enter Blood Group: ";
-            cin >> new_patient.b_group;
-            cout << "Enter Date: ";
-            cin >> new_patient.date;
-            cout << "Enter Illness: ";
-            cin >> new_patient.illness;
-        }
-        else if (choice == 2)
-        {
-            cout << "Enter Patient ID to retrieve information" << endl;
-            cin >> update_id;
-        }
-        else if (choice == 3) {
-
-            cout << "Enter Patient ID to update: ";
-            cin >> update_id;
-        }
-        else if (choice == 4) {
-            cout << "Enter Patient ID to delete: ";
-            cin >> update_id;
-        }
-
-    }
-    len_id = update_id.size();
-    MPI_Bcast(&len_id, 1, MPI_INT, 0, MPI_COMM_WORLD);
-    if (world_rank != 0) {
-        update_id.resize(len_id);
-    }
-    MPI_Bcast(&update_id[0], len_id, MPI_CHAR, 0, MPI_COMM_WORLD);
-    MPI_Barrier(MPI_COMM_WORLD);
-    MPI_Bcast(&choice, 1, MPI_INT, 0, MPI_COMM_WORLD);
-    MPI_Barrier(MPI_COMM_WORLD);
-    if (choice == 1)
-        MPI_Bcast(&new_patient, sizeof(PatientData), MPI_BYTE, 0, MPI_COMM_WORLD);
-    else if (choice == 2)
-        MPI_Bcast(&update_id, update_id.length(), MPI_CHAR, 0, MPI_COMM_WORLD);
-    else if (choice == 3)
-        MPI_Bcast(&update_id, update_id.length(), MPI_CHAR, 0, MPI_COMM_WORLD);
-    else if (choice == 4)
-        MPI_Bcast(&update_id, update_id.length(), MPI_CHAR, 0, MPI_COMM_WORLD);
-    MPI_Barrier(MPI_COMM_WORLD);
-
-    switch (choice) {
-    case 1: {
-
-        status1 = calladdnode(root, new_patient, world_size, world_rank, &local_size);
-        int global_status;
-        int local_status = status1 ? 1 : 0;
-        MPI_Allreduce(&local_status, &global_status, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);
-
-        bool any_process_found = (global_status == 1);
-        if (any_process_found) {
-            if (world_rank == 0) {
-                cout << "record added successfully" << endl;
-                logmod(new_patient.P_id, "add record", 1);
-            }
-        }
-        else {
-            if (world_rank == 0) {
-                cout << "record not entered" << endl;
-                logmod(new_patient.P_id, "add record", 0);
-            }
-        }
-        MPI_Barrier(MPI_COMM_WORLD);
-        break;
-    }
-    case 2: {
-
-        bool status1 = printdataspecific(root, update_id, world_rank);
-        int global_status;
-        int local_status = status1 ? 1 : 0;
-        MPI_Allreduce(&local_status, &global_status, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);
-        if (global_status == 0 && world_rank == 0) {
-            cout << "No data found" << endl;
-            logmod(new_patient.P_id, "retrieve record", 0);
-        }
-
-        break;
-    }
-    case 3: {
-        bool updated = Update(root, update_id, world_rank);
-        int global_status;
-        int local_status = updated ? 1 : 0;
-        MPI_Allreduce(&local_status, &global_status, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);
-        if (global_status == 0 && world_rank == 0) {
-            cout << "Patient updatation failed" << endl;
-            logmod(new_patient.P_id, "update record", 0);
-        }
-        else if (updated && global_status == 1 && world_rank == 0) {
-            cout << "Patient updated successfully" << endl;
-            logmod(new_patient.P_id, "update record", 1);
-        }
-        break;
-    }
-    case 4: {
-        bool deleted = calldelNode(root, update_id, world_size, world_rank, &local_size);
-        break;
-    }
-    case 5: {
+    do {
         if (world_rank == 0) {
-            displaylog();
+            cout << "=== Menu ===" << endl;
+            cout << "1. Add Patient Data" << endl;
+            cout << "2. Search for Patient Data" << endl;
+            cout << "3. Update Patient Data" << endl;
+            cout << "4. Delete Patient Data" << endl;
+            cout << "5. Display Log" << endl;
+            cout << "6. Exit" << endl;
+            cout << "Enter your choice: ";
+            cin >> choice;
+
+            if (choice == 1) {
+
+                cout << "Enter Patient ID: ";
+                cin >> new_patient.P_id;
+                cin.ignore();
+                cout << "Enter Age: ";
+                cin >> new_patient.age;
+                cin.ignore();
+                cout << "Enter Sex: ";
+                cin >> new_patient.sex;
+                cin.ignore();
+                cout << "Enter Blood Group: ";
+                cin >> new_patient.b_group;
+                cin.ignore();
+                cout << "Enter Date: ";
+                cin >> new_patient.date;
+                cin.ignore();
+                cout << "Enter Illness: ";
+                cin >> new_patient.illness;
+                cin.ignore();
+            }
+            else if (choice == 2)
+            {
+                cout << "Enter Patient ID to retrieve information" << endl;
+                cin >> update_id;
+            }
+            else if (choice == 3) {
+
+                cout << "Enter Patient ID to update: ";
+                cin >> update_id;
+            }
+            else if (choice == 4) {
+                cout << "Enter Patient ID to delete: ";
+                cin >> update_id;
+            }
+
         }
-        break;
-    }
-    case 6: {
-        // Exit
-        if (world_rank == 0)
-            exitfile(root, world_rank);
-        break;
-    }
-    default: {
-        if (world_rank == 0)
-            cout << "Invalid choice. Please try again." << endl << endl;
-        break;
-    }
-    }
+        len_id = update_id.size();
+        MPI_Bcast(&len_id, 1, MPI_INT, 0, MPI_COMM_WORLD);
+        if (world_rank != 0) {
+            update_id.resize(len_id);
+        }
+        MPI_Bcast(&update_id[0], len_id, MPI_CHAR, 0, MPI_COMM_WORLD);
+        MPI_Barrier(MPI_COMM_WORLD);
+        MPI_Bcast(&choice, 1, MPI_INT, 0, MPI_COMM_WORLD);
+        MPI_Barrier(MPI_COMM_WORLD);
+        if (choice == 1)
+            MPI_Bcast(&new_patient, sizeof(PatientData), MPI_BYTE, 0, MPI_COMM_WORLD);
+        else if (choice == 2)
+            MPI_Bcast(&update_id, update_id.length(), MPI_CHAR, 0, MPI_COMM_WORLD);
+        else if (choice == 3)
+            MPI_Bcast(&update_id, update_id.length(), MPI_CHAR, 0, MPI_COMM_WORLD);
+        else if (choice == 4)
+            MPI_Bcast(&update_id, update_id.length(), MPI_CHAR, 0, MPI_COMM_WORLD);
+        MPI_Barrier(MPI_COMM_WORLD);
+
+        switch (choice) {
+        case 1: {
+
+            status1 = calladdnode(root, new_patient, world_size, world_rank, &local_size);
+            int global_status;
+            int local_status = status1 ? 1 : 0;
+            MPI_Allreduce(&local_status, &global_status, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);
+
+            bool any_process_found = (global_status == 1);
+            if (any_process_found) {
+                if (world_rank == 0) {
+                    cout << "record added successfully" << endl;
+                    logmod(new_patient.P_id, "add record", 1);
+                }
+            }
+            else {
+                if (world_rank == 0) {
+                    cout << "record not entered" << endl;
+                    logmod(new_patient.P_id, "add record", 0);
+                }
+            }
+            MPI_Barrier(MPI_COMM_WORLD);
+            break;
+        }
+        case 2: {
+
+            bool status1 = printdataspecific(root, update_id, world_rank);
+            int global_status;
+            int local_status = status1 ? 1 : 0;
+            MPI_Allreduce(&local_status, &global_status, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);
+            if (global_status == 0 && world_rank == 0) {
+                cout << "No data found" << endl;
+                logmod(new_patient.P_id, "retrieve record", 0);
+            }
+
+            break;
+        }
+        case 3: {
+            bool updated = Update(root, update_id, world_rank);
+            int global_status;
+            int local_status = updated ? 1 : 0;
+            MPI_Allreduce(&local_status, &global_status, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);
+            if (global_status == 0 && world_rank == 0) {
+                cout << "Patient updatation failed" << endl;
+                logmod(new_patient.P_id, "update record", 0);
+            }
+            else if (updated && global_status == 1 && world_rank == 0) {
+                cout << "Patient updated successfully" << endl;
+                logmod(new_patient.P_id, "update record", 1);
+            }
+            break;
+        }
+        case 4: {
+            bool deleted = calldelNode(root, update_id, world_size, world_rank, &local_size);
+            break;
+        }
+        case 5: {
+            if (world_rank == 0) {
+                displaylog();
+            }
+            break;
+        }
+        case 6: {
+            // Exit
+            if (world_rank == 0)
+                exitfile(root, world_rank,world_size);
+            break;
+        }
+        default: {
+            if (world_rank == 0)
+                cout << "Invalid choice. Please try again." << endl << endl;
+            break;
+        }
+        }
+    }while (choice != 6);
 
     MPI_Finalize();
     return 0;
@@ -498,13 +537,14 @@ bool calladdnode(Node* root, PatientData p, int world_size, int world_rank, int*
         MPI_Send(&x, 1, MPI_INT, 0, 0, MPI_COMM_WORLD);
     }
     if (world_rank == 0) {
-        int arr[2];
-        for (int i = 0; i < 2; i++) {
+        int* arr = new int[world_size];
+        for (int i = 0; i < world_size-1; i++) {
             MPI_Recv(&arr[i], 1, MPI_INT, i + 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
         }
+        
         int minsize = *local_size;
 
-        for (int i = 0; i < 2; i++) {
+        for (int i = 0; i < world_size-1; i++) {
             if (minsize > arr[i]) {
                 minsize = arr[i];
                 minindex = i + 1;
@@ -541,16 +581,21 @@ bool calldelNode(Node* root, string key, int world_size, int world_rank, int* lo
     }
 
     if (world_rank == 0) {
-        int arr[2];
-        for (int i = 0; i < 2; i++) {
+        int* arr = new int[world_size];
+        for (int i = 0; i < world_size-1; i++) {
             MPI_Recv(&arr[i], 1, MPI_INT, i + 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
         }
-        if (arr[0] == 1) {
+        for (int i = 0; i < world_size-1; i++) {
+            if (arr[i] == 1) {
+                status1 = true;
+            }
+        }
+       /* if (arr[0] == 1) {
             status1 = true;
         }
         else if (arr[1] == 1) {
             status1 = true;
-        }
+        }*/
     }
 
 
@@ -614,7 +659,7 @@ bool printdataspecific(Node* root, string key, int world_rank) {
     Node* result = nullptr;
     bool status1 = Search(root, key, result);
     MPI_Barrier(MPI_COMM_WORLD);
-    if (world_rank == 0 && status1 == true) {
+   /* if (world_rank == 0 && status1 == true) {
         cout << "The id is " << result->key.P_id << endl;
         cout << "The age is " << result->key.age << endl;
         cout << "The blood group is " << result->key.b_group << endl;
@@ -643,6 +688,18 @@ bool printdataspecific(Node* root, string key, int world_rank) {
         cout << "The illness is " << result->key.illness << endl;
         logmod(key, "update record", 1);
         return true;
+    }*/
+    if (status1 == true) {
+        if (result->key.P_id != "") {
+            cout << "The id is " << result->key.P_id << endl;
+            cout << "The age is " << result->key.age << endl;
+            cout << "The blood group is " << result->key.b_group << endl;
+            cout << "The date is" << result->key.date << endl;
+            cout << "The sex is " << result->key.sex << endl;
+            cout << "The illness is " << result->key.illness << endl;
+            logmod(key, "update record", 1);
+            return true;
+        }
     }
     else {
         return false;
@@ -657,7 +714,7 @@ void logmod(string key, string operation, bool status1) {
 
     string time = time_str;
     ofstream write;
-    write.open("C:/Users/ompar/Downloads/installation of MPI on Windows_x64/installation of MPI on Windows_x64/MPI_PROJECT/MPI_PROJECT/log.txt", ios::app);
+    write.open("log.txt", ios::app);
     if (write.is_open()) {
         write << key;
         write << " , ";
@@ -673,7 +730,7 @@ void logmod(string key, string operation, bool status1) {
     write.close();
 }
 void displaylog() {
-    ifstream read("C:/Users/ompar/Downloads/installation of MPI on Windows_x64/installation of MPI on Windows_x64/MPI_PROJECT/MPI_PROJECT/log.txt");
+    ifstream read("log.txt");
     if (read.is_open()) {
         string line;
         while (getline(read, line)) {
@@ -687,13 +744,17 @@ void displaylog() {
 }
 
 
-void exitfile(Node* root, int world_rank) {
-    if (root == nullptr)
+void exitfile(Node* root, int world_rank,int worldsize) {
+    if (root == nullptr) {
+        ofstream write("f_c.txt");
+        write << worldsize;
+        write.close();
         return;
+    }
 
     // Open the file only once
-    if (world_rank >= 0 && world_rank < 3) {
-        write.open("C:/Users/ompar/Downloads/installation of MPI on Windows_x64/installation of MPI on Windows_x64/MPI_PROJECT/MPI_PROJECT/f" + to_string(world_rank + 1) + ".txt", ios::app);
+    if (world_rank >= 0 && world_rank < worldsize-1) {
+        write.open("f" + to_string(world_rank + 1) + ".txt", ios::app);
         if (!write.is_open()) {
             cout << "Error opening file f" << world_rank + 1 << ".txt" << endl;
             return;
@@ -705,11 +766,11 @@ void exitfile(Node* root, int world_rank) {
         << root->key.b_group << ", " << root->key.date << ", " << root->key.illness << endl;
 
     // Recursively call exitfile for left and right children
-    exitfile(root->left, world_rank);
-    exitfile(root->right, world_rank);
+    exitfile(root->left, world_rank,worldsize);
+    exitfile(root->right, world_rank,worldsize);
 
     // Close the file only once
-    if (world_rank >= 0 && world_rank < 3) {
+    if (world_rank >= 0 && world_rank < worldsize-1) {
         write.close();
     }
 }

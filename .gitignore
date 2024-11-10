@@ -1,0 +1,34 @@
+# Visual Studio specific
+.vscode/
+.vs/
+*.vcxproj.user
+*.suo
+*.exe
+*.obj
+*.dll
+*.pdb
+*.ipch
+*.log
+*.idb
+*.tlog
+*.lastbuildstate
+*.cache
+*.opensdf
+*.sdf
+
+# Build directories
+x64/
+Debug/
+Release/
+build/
+out/
+
+# Backup and temporary files
+*.tmp
+*.bak
+*.old
+*.~*
+
+# OS specific files
+.DS_Store
+Thumbs.db
